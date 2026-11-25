@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>お天気生活ナビ</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:sans-serif;background:#edf4fa;color:#243447}
+header{background:#1769aa;color:white;padding:22px 18px}
+h1{font-size:23px;margin:0}
+header p{margin:7px 0 0;font-size:13px}
+main{padding:16px;max-width:650px;margin:auto}
+select,button{width:100%;padding:14px;border:0;border-radius:10px;font-size:16px}
+select{background:white;margin-bottom:14px}
+button{background:#1769aa;color:white;font-weight:bold}
+.card{background:white;border-radius:15px;padding:18px;margin:14px 0;box-shadow:0 3px 12px #ccd8e3}
+.big{font-size:42px;font-weight:bold;margin:12px 0}
+.sub{color:#60758a;font-size:14px}
+.days{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.day{background:#f0f6fc;border-radius:12px;padding:12px 5px;text-align:center}
+.day strong{display:block;margin:8px 0}
+.day .temp{font-size:18px;font-weight:bold}
+footer{text-align:center;font-size:12px;color:#60758a;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<h1>☀️ お天気生活ナビ</h1>
+<p>関西の天気と暮らしに役立つ情報</p>
+</header>
+<main>
+<h3>📍 地域を選択</h3>
+<select id="city">
+<option value="34.6937,135.5023">大阪府・大阪市</option>
+<option value="35.0116,135.7681">京都府・京都市</option>
+<option value="34.6901,135.1956">兵庫県・神戸市</option>
+<option value="34.6851,135.8048">奈良県・奈良市</option>
+<option value="35.0045,135.8686">滋賀県・大津市</option>
+<option value="34.2260,135.1675">和歌山県・和歌山市</option>
+</select>
+<button onclick="loadWeather()">天気を更新する</button>
+<div id="result">
+<div class="card">地域を選んで天気を取得してください。</div>
+</div>
+</main>
+<footer>
+Weather data by <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a><br>
+予報は気象モデルによる参考情報です
+</footer>
+<script>
+const names={
+0:"快晴",1:"晴れ",2:"一部曇り",3:"曇り",
+45:"霧",48:"霧氷",
+51:"弱い霧雨",53:"霧雨",55:"強い霧雨",
+61:"弱い雨",63:"雨",65:"強い雨",
+71:"弱い雪",73:"雪",75:"大雪",
+80:"にわか雨",81:"雨",82:"強いにわか雨",
+95:"雷雨",96:"雷雨・ひょう",99:"強い雷雨"
+};
+const icons={
+0:"☀️",1:"🌤️",2:"⛅",3:"☁️",
+45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌧️",
+61:"🌧️",63:"🌧️",65:"🌧️",
+71:"🌨️",73:"❄️",75:"❄️",
+80:"🌦️",81:"🌧️",82:"⛈️",
+95:"⛈️",96:"⛈️",99:"⛈️"
+};
+async function loadWeather(){
+const result=document.getElementById("result");
+const city=document.getElementById("city");
+const [lat,lon]=city.value.split(",");
+const place=city.options[city.selectedIndex].text;
+result.innerHTML='<div class="card">🌤️ 天気データを取得中...</div>';
+try{
+const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=3`;
+const response=await fetch(url);
+if(!response.ok)throw new Error("通信エラー");
+const data=await response.json();
+const c=data.current;
+const d=data.daily;
+const code=c.weather_code;
+let html=`
+<div class="card">
+<div class="sub">📍 ${place}</div>
+<h2>${icons[code]||"🌤️"} ${names[code]||"天気情報"}</h2>
+<div class="big">${c.temperature_2m}℃</div>
+<p>体感温度：${c.apparent_temperature}℃</p>
+<p>湿度：${c.relative_humidity_2m}%</p>
+<p>降水量：${c.precipitation} mm</p>
+<p>風速：${c.wind_speed_10m} km/h</p>
+<p class="sub">観測時刻：${c.time.replace("T"," ")}</p>
+</div>
+<h3>📅 3日間の天気予報</h3>
+<div class="days">`;
+for(let i=0;i<3;i++){
+const w=d.weather_code[i];
+const date=new Date(d.time[i]+"T00:00:00");
+const day=date.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"});
+html+=`
+<div class="day">
+<div>${day}</div>
+<div>${icons[w]||"🌤️"}</div>
+<strong>${names[w]||"天気"}</strong>
+<div class="temp">${d.temperature_2m_max[i]}℃</div>
+<div class="sub">最低 ${d.temperature_2m_min[i]}℃</div>
+<div class="sub">☔ ${d.precipitation_probability_max[i]??"—"}%</div>
+</div>`;
+}
+html+="</div>";
+result.innerHTML=html;
+}catch(e){
+result.innerHTML='<div class="card">⚠️ 天気データを取得できませんでした。通信状態を確認して再度お試しください。</div>';
+}
+}
+loadWeather();
+</script>
+</body>
+</html>

@@ -135,6 +135,15 @@ result.innerHTML=html;
 result.innerHTML='<div class="card">⚠️ 天気データを取得できませんでした。通信状態を確認して再度お試しください。</div>';
 }
 }
+try {
+  const city = document.getElementById("city");
+  const saved = localStorage.getItem("otenki-city");
+  if (saved && [...city.options].some(o => o.value === saved)) {
+    city.value = saved;
+  }
+} catch (e) {
+  console.warn("地域を読み戻せませんでした", e);
+}
 loadWeather();
 </script>
 </body>

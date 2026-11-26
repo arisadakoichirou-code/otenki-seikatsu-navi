@@ -124,7 +124,7 @@ const day=date.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"});
 html+=`
 <div class="day">
 <div>${day}</div>
-<div>${icons[w]||"🌤️"}</div>
+<div>${icons[w] || "🌤️"}</div>
 <strong>${names[w]||"天気"}</strong>
 <div class="temp">${d.temperature_2m_max[i]}℃</div>
 <div class="sub">最低 ${d.temperature_2m_min[i]}℃</div>
@@ -149,7 +149,7 @@ if (h && Array.isArray(h.time)) {
       html += `
         <p>
           <strong>${t.slice(5, 10).replace("-", "/")} ${t.slice(11, 16)}</strong>
-          ${icons[w] || ""} ${names[w] || "不明"}
+          ${h.is_day?.[i] === 0 && [0, 1, 2].includes(w) ? "🌙" : (icons[w] || "")} ${names[w] || "不明"}
           ${temp ?? "--"}℃ ／ 降水確率 ${rain ?? "--"}%
         </p>`;
     }

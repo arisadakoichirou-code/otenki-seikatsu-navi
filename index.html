@@ -102,6 +102,7 @@ if(!response.ok)throw new Error("通信エラー");
 const data=await response.json();
 const c=data.current;
 const d=data.daily;
+console.log("1時間予報", data.hourly);
 const code=c.weather_code;
 let html=`
 <div class="card">

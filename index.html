@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -138,6 +139,28 @@ if (h && Array.isArray(h.time)) {
   const start = h.time.findIndex(t => t >= c.time);
 
   if (start >= 0) {
+const rain12 = h.precipitation_probability
+  ?.slice(start, start + 12) ?? [];
+
+const validRain = rain12.filter(
+  p => typeof p === "number" &&
+       Number.isFinite(p) && p >= 0 && p <= 100
+);
+
+let umbrella;
+if (validRain.some(p => p >= 40)) {
+  umbrella = "☂️ 雨具があると安心です";
+} else if (validRain.length < 12) {
+  umbrella = "☂️ データ不足のため判断できません";
+} else {
+  umbrella = "🌂 降水確率は低めです。お出かけ前にも確認を";
+}
+
+html += `<div class="card">
+  <h3>☂️ 傘いる？ナビ</h3>
+  <p>${umbrella}</p>
+  <p class="sub">この先12時間の各時間の降水確率を使った独自の目安です。</p>
+</div>`;
     html += '<div class="card">';
 
     for (let i = start; i < Math.min(start + 12, h.time.length); i++) {

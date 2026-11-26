@@ -95,7 +95,8 @@ const [lat,lon]=city.value.split(",");
 const place=city.options[city.selectedIndex].text;
 result.innerHTML='<div class="card">🌤️ 天気データを取得中...</div>';
 try{
-const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=3`;
+const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=3&hourly=temperature_2m,weather_code,precipitation_probability`;
+
 const response=await fetch(url);
 if(!response.ok)throw new Error("通信エラー");
 const data=await response.json();

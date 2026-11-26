@@ -132,6 +132,35 @@ html+=`
 </div>`;
 }
 html+="</div>";
+html += "<h3>🕒 これから12時間の天気予報</h3>";
+
+if (h && Array.isArray(h.time)) {
+  const start = h.time.findIndex(t => t >= c.time);
+
+  if (start >= 0) {
+    html += '<div class="card">';
+
+    for (let i = start; i < Math.min(start + 12, h.time.length); i++) {
+      const t = h.time[i];
+      const w = h.weather_code?.[i];
+      const temp = h.temperature_2m?.[i];
+      const rain = h.precipitation_probability?.[i];
+
+      html += `
+        <p>
+          <strong>${t.slice(5, 10).replace("-", "/")} ${t.slice(11, 16)}</strong>
+          ${icons[w] || ""} ${names[w] || "不明"}
+          ${temp ?? "--"}℃ ／ 降水確率 ${rain ?? "--"}%
+        </p>`;
+    }
+
+    html += "</div>";
+  } else {
+    html += "<p>時間別予報がありません。</p>";
+  }
+} else {
+  html += "<p>時間別予報を取得できませんでした。</p>";
+}
 result.innerHTML=html;
 }catch(e){
 result.innerHTML='<div class="card">⚠️ 天気データを取得できませんでした。通信状態を確認して再度お試しください。</div>';
